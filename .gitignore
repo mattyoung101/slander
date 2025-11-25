@@ -1,0 +1,6 @@
+.cache
+build**
+*.bkp
+*.autosave
+.directory
+.nvim
