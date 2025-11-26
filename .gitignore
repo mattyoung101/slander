@@ -1,5 +1,6 @@
 .cache
 build**
+!**build.yml
 *.bkp
 *.autosave
 .directory
