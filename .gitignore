@@ -1,6 +1,6 @@
 .cache
-build**
-!**build.yml
+build
+build_debug
 *.bkp
 *.autosave
 .directory

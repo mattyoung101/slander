@@ -7,6 +7,7 @@
 #pragma once
 #include "slang/syntax/SyntaxTree.h"
 #include "slang/syntax/SyntaxVisitor.h"
+#include "slang/syntax/AllSyntax.h"
 #include <cstddef>
 #include <memory>
 
@@ -35,7 +36,7 @@ public:
     using Ptr = std::unique_ptr<MinimisationStrategy>;
 };
 
-/// Strategy that removes processes from the document
+/// Strategy that removes processes (always_ff, etc) from the document
 struct RemoveProcessMinimisationStrategy : public MinimisationStrategy {
 public:
     RemoveProcessMinimisationStrategy() = default;
@@ -44,11 +45,27 @@ public:
 
     void act(SyntaxTree &tree, size_t action) override;
 
-    class Proposer : SyntaxRewriter<MinimisationStrategy> { };
+    class Proposer : SyntaxRewriter<Proposer> {
+        public:
+            void visit(const ProceduralBlockSyntax &block);
 
-    class Editor : SyntaxRewriter<MinimisationStrategy> { };
+        private:
+            size_t count = 0;
 
-    class Repairer : SyntaxRewriter<MinimisationStrategy> { };
+    };
+
+    class Editor : SyntaxRewriter<Editor> {
+        public:
+            Editor(size_t which) : which(which) {}
+            void visit(const ProceduralBlockSyntax &block);
+
+        private:
+            size_t which = 0;
+            size_t count = 0;
+
+    };
+
+    class Repairer : SyntaxRewriter<Repairer> { };
 };
 
 } // namespace slander

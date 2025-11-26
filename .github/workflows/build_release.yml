@@ -1,11 +1,11 @@
-name: "Build"
+name: "Build (Release)"
 on:
   push:
   pull_request:
 
 jobs:
   build:
-    name: Build
+    name: Build (Release)
     runs-on: ubuntu-22.04
     env:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
