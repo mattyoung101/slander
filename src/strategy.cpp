@@ -12,23 +12,28 @@
 using namespace slander;
 using namespace slang::syntax;
 
-size_t RemoveProcessMinimisationStrategy::proposeActions(const SyntaxTree &tree) {
-    // TODO use the proposer
-    return 0;
+size_t RemoveProcessMinimisationStrategy::proposeActions(const SyntaxTreePtr &tree) {
+    Proposer proposer;
+    proposer.transform(tree);
+    return proposer.count;
 }
 
-void RemoveProcessMinimisationStrategy::act(SyntaxTree &tree, size_t action) {
-    // TODO use the editor and then the repairer
+SyntaxTreePtr RemoveProcessMinimisationStrategy::act(SyntaxTreePtr &tree, size_t action) {
+    Editor editor(action);
+    auto newTree = editor.transform(tree);
+
+    return newTree;
 }
 
-void RemoveProcessMinimisationStrategy::Proposer::visit(const ProceduralBlockSyntax &block) {
+void RemoveProcessMinimisationStrategy::Proposer::handle(const ProceduralBlockSyntax &block) {
     count++;
 }
 
-void RemoveProcessMinimisationStrategy::Editor::visit(const ProceduralBlockSyntax &block) {
+void RemoveProcessMinimisationStrategy::Editor::handle(const ProceduralBlockSyntax &block) {
     if (count == which) {
         SPDLOG_DEBUG("Removing block at idx {}: {}", count, block.toString());
         remove(block);
+        return;
     }
     count++;
 }

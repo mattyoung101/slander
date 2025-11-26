@@ -5,19 +5,54 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
 // was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #include "slander/strategy.hpp"
-#include <slang/syntax/AllSyntax.h>
-#include <slang/syntax/SyntaxTree.h>
+#include "slang/syntax/AllSyntax.h"
+#include "slang/syntax/SyntaxPrinter.h"
+#include "slang/syntax/SyntaxTree.h"
+#include <algorithm>
+#include <iostream>
 #include <spdlog/spdlog.h>
+
+using namespace slang;
+using namespace slang::syntax;
+using namespace slander;
 
 #include <catch2/catch_test_macros.hpp>
 
-unsigned int Factorial(unsigned int number) {
-    return number <= 1 ? number : Factorial(number - 1) * number;
+constexpr std::string strip(const std::string &str) {
+    std::string local;
+    std::ranges::remove_if(local.begin(), local.end(), isspace);
+    return local;
 }
 
-TEST_CASE("Factorials are computed", "[factorial]") {
-    REQUIRE(Factorial(1) == 1);
-    REQUIRE(Factorial(2) == 2);
-    REQUIRE(Factorial(3) == 6);
-    REQUIRE(Factorial(10) == 3628800);
+TEST_CASE("Single process block is removed", "[RemoveProcessMinimisationStrategy]") {
+    auto tree = SyntaxTree::fromText(R"(
+module top(
+    input logic clk,
+    input logic a,
+    output logic b
+);
+
+always_ff @(posedge clk) begin
+    b <= a;
+end
+
+endmodule
+)");
+
+    RemoveProcessMinimisationStrategy strat;
+    auto count = strat.proposeActions(tree);
+    REQUIRE(count == 1);
+
+    auto result = strat.act(tree, 0);
+    std::cout << strip(SyntaxPrinter::printFile(*result)) << std::endl;
+
+    REQUIRE(strip(SyntaxPrinter::printFile(*result)) == strip(R"(
+module top(
+    input logic clk,
+    input logic a,
+    output logic b
+);
+
+endmodule
+    )"));
 }

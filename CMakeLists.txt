@@ -7,7 +7,7 @@ project(slander
 )
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(CMAKE_C_STANDARD 11) # C11
 set(CMAKE_CXX_STANDARD 20) # C++20
 cmake_policy(SET CMP0144 NEW)
@@ -50,15 +50,15 @@ target_compile_options(slander_test PRIVATE "-Wall" "-Wextra" "-Wno-unused-param
 target_compile_definitions(slander_test PRIVATE "-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE")
 
 #### LINKER
-message(STATUS "Checking if LLD is available")
-execute_process(COMMAND "lld" ERROR_VARIABLE LLD_RESULT)
+message(STATUS "Checking if mold is available")
+execute_process(COMMAND "mold" ERROR_VARIABLE MOLD_RESULT)
 
-if (LLD_RESULT MATCHES "lld is a generic driver")
-    message(STATUS "LLD is available, it will be used")
-    target_link_options(slander PRIVATE "-fuse-ld=lld")
-    target_link_options(slander_test PRIVATE "-fuse-ld=lld")
+if (MOLD_RESULT MATCHES "option is missing")
+    message(STATUS "mold is available, it will be used")
+    target_link_options(slander PRIVATE "-fuse-ld=mold")
+    target_link_options(slander_test PRIVATE "-fuse-ld=mold")
 else()
-    message(STATUS "LLD is NOT available, so we'll use the system default linker")
+    message(STATUS "mold is NOT available, so we'll use the system default linker")
 endif()
 
 ## SANITIZERS

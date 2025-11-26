@@ -15,6 +15,8 @@ namespace slander {
 
 using namespace slang::syntax;
 
+using SyntaxTreePtr = std::shared_ptr<SyntaxTree>;
+
 /// A strategy that can be employed to minimise a SV/V document
 struct MinimisationStrategy {
 public:
@@ -27,11 +29,11 @@ public:
 
     /// Returns the number of actions that this minimisation strategy can take; e.g.
     /// RemoveProcessMinimisationStrategy would return the number of processes in the document
-    virtual size_t proposeActions(const SyntaxTree &tree) = 0;
+    virtual size_t proposeActions(const SyntaxTreePtr &tree) = 0;
 
     /// Performs the action on the syntax tree, e.g. RemoveProcessMinimisationStrategy should remove the Nth
     /// process from the document, where N = 'action'
-    virtual void act(SyntaxTree &tree, size_t action) = 0;
+    virtual SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) = 0;
 
     using Ptr = std::unique_ptr<MinimisationStrategy>;
 };
@@ -41,31 +43,25 @@ struct RemoveProcessMinimisationStrategy : public MinimisationStrategy {
 public:
     RemoveProcessMinimisationStrategy() = default;
 
-    size_t proposeActions(const SyntaxTree &tree) override;
+    size_t proposeActions(const SyntaxTreePtr &tree) override;
 
-    void act(SyntaxTree &tree, size_t action) override;
+    SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) override;
 
-    class Proposer : SyntaxRewriter<Proposer> {
-        public:
-            void visit(const ProceduralBlockSyntax &block);
-
-        private:
-            size_t count = 0;
-
+    struct Proposer : SyntaxRewriter<Proposer> {
+        void handle(const ProceduralBlockSyntax &block);
+        size_t count = 0;
     };
 
-    class Editor : SyntaxRewriter<Editor> {
+    struct Editor : SyntaxRewriter<Editor> {
         public:
             Editor(size_t which) : which(which) {}
-            void visit(const ProceduralBlockSyntax &block);
+            void handle(const ProceduralBlockSyntax &block);
 
         private:
             size_t which = 0;
             size_t count = 0;
 
     };
-
-    class Repairer : SyntaxRewriter<Repairer> { };
 };
 
 } // namespace slander
