@@ -40,6 +40,9 @@ jobs:
       - name: Build
         run: just build_debug
 
+      - name: Run tests
+        run: cd build_debug; ./slander_test
+
       - name: Lint
         uses: cpp-linter/cpp-linter-action@v2
         id: linter

@@ -5,14 +5,15 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
 // was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #include "CLI/CLI.hpp"
+#include "slander/slander.hpp"
 #include "slander/strategy.hpp"
-#include "slang/util/VersionInfo.h"
 #include "spdlog/spdlog.h"
 #include <csignal>
 #include <cstdlib>
 #include <memory>
 #include <random>
 #include <slang/util/Util.h>
+#include <slang/util/VersionInfo.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 #include <unistd.h>
 
@@ -37,6 +38,12 @@ std::vector<MinimisationStrategy::Ptr> registerStrategies() {
     return out;
 }
 
+std::unordered_map<std::string, SearchStrategy> SEARCH_STRATEGY_VALUE = {
+    { "exhaustive", SearchStrategy::Exhaustive },
+    { "random-timeout", SearchStrategy::RandomTimeout },
+    { "random-attempts", SearchStrategy::RandomAttempts },
+};
+
 } // namespace
 
 int main(int argc, char *argv[]) {
@@ -57,6 +64,7 @@ int main(int argc, char *argv[]) {
 
     std::filesystem::path input;
     std::string programCmdLine;
+    SearchStrategy searchStrat;
 
     std::random_device rd;
     uint64_t seed = rd();
@@ -70,6 +78,12 @@ int main(int argc, char *argv[]) {
            "path to the minimised document will be appended to the command line. The program should return 0 "
            "if no bug exists. Anything else is treated as the bug still existing.")
         ->required();
+    app.add_option("-s,--strategy", searchStrat,
+           "Search strategy to use. 'exhausitive' will try all possible minimisations. 'random-attempts' and "
+           "'random-timeout' will randomly try for a given number of attempts or a timeout in seconds, "
+           "respectively.")
+        ->required()
+        ->transform(CLI::CheckedTransformer(SEARCH_STRATEGY_VALUE, CLI::ignore_case));
     app.add_option(
         "--seed", seed, "Fixed RNG seed for reproducibility. If not specified, a random seed is used.");
     app.set_version_flag("-v,--version",
