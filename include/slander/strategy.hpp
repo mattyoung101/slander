@@ -28,10 +28,10 @@ public:
     MinimisationStrategy &operator=(MinimisationStrategy &&) = default;
 
     /// Returns the number of actions that this minimisation strategy can take; e.g.
-    /// RemoveProcessMinimisationStrategy would return the number of processes in the document
+    /// RemoveProcessMinimiser would return the number of processes in the document
     virtual size_t proposeActions(const SyntaxTreePtr &tree) = 0;
 
-    /// Performs the action on the syntax tree, e.g. RemoveProcessMinimisationStrategy should remove the Nth
+    /// Performs the action on the syntax tree, e.g. RemoveProcessMinimiser should remove the Nth
     /// process from the document, where N = 'action'
     virtual SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) = 0;
 
@@ -39,9 +39,9 @@ public:
 };
 
 /// Strategy that removes processes (always_ff, etc) from the document
-struct RemoveProcessMinimisationStrategy : public MinimisationStrategy {
+struct RemoveProcessMinimiser : public MinimisationStrategy {
 public:
-    RemoveProcessMinimisationStrategy() = default;
+    RemoveProcessMinimiser() = default;
 
     size_t proposeActions(const SyntaxTreePtr &tree) override;
 

@@ -24,7 +24,7 @@ constexpr std::string strip(const std::string &str) {
     return local;
 }
 
-TEST_CASE("Single process block is removed", "[RemoveProcessMinimisationStrategy]") {
+TEST_CASE("Single process block is removed", "[RemoveProcessMinimiser]") {
     auto tree = SyntaxTree::fromText(R"(
 module top(
     input logic clk,
@@ -39,7 +39,7 @@ end
 endmodule
 )");
 
-    RemoveProcessMinimisationStrategy strat;
+    RemoveProcessMinimiser strat;
     auto count = strat.proposeActions(tree);
     REQUIRE(count == 1);
 

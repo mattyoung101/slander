@@ -33,7 +33,7 @@ using namespace slander;
 
 std::vector<MinimisationStrategy::Ptr> registerStrategies() {
     std::vector<MinimisationStrategy::Ptr> out;
-    out.push_back(std::make_unique<RemoveProcessMinimisationStrategy>());
+    out.push_back(std::make_unique<RemoveProcessMinimiser>());
     return out;
 }
 
