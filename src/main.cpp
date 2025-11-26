@@ -6,13 +6,13 @@
 // was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #include "CLI/CLI.hpp"
 #include "slander/slander.hpp"
+#include "slander/strategy.hpp"
 #include "slang/util/VersionInfo.h"
 #include "spdlog/spdlog.h"
 #include <csignal>
-#include <exception>
-#include <filesystem>
 #include <spdlog/sinks/ansicolor_sink.h>
 #include <unistd.h>
+#include "slang/syntax/SyntaxVisitor.h"
 
 constexpr std::string SLANDER_VERSION = "1.0.0";
 
@@ -25,6 +25,12 @@ void sigIntHandler(int signal) {
 
     exit(0);
 }
+
+using namespace slang::syntax;
+
+// FIXME we need to figure out how to have like an array of multiple templates
+
+// void registerEditors(std::vector<SyntaxVisitor> &out)
 
 } // namespace
 
@@ -64,7 +70,10 @@ int main(int argc, char *argv[]) {
     if (shouldPrintVersion) {
         SPDLOG_INFO("Slander v{} - (c) 2025 M. L. Young. Licenced under the MPL 2.0.", SLANDER_VERSION);
         SPDLOG_INFO("Using Slang version: {}.{}", VersionInfo::getMajor(), VersionInfo::getMinor());
+        return 0;
     }
+
+    slander::RemoveProcessMinimisationStrategy::Editor editor;
 
     return 0;
 }
