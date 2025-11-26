@@ -18,6 +18,7 @@ include(cmake/CPM.cmake)
 
 add_executable(slander
     src/main.cpp
+    src/strategy.cpp
 )
 target_include_directories(slander PRIVATE include)
 

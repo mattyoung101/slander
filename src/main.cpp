@@ -5,16 +5,18 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
 // was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #include "CLI/CLI.hpp"
-#include "slander/slander.hpp"
 #include "slander/strategy.hpp"
 #include "slang/util/VersionInfo.h"
 #include "spdlog/spdlog.h"
 #include <csignal>
+#include <cstdlib>
+#include <memory>
+#include <random>
+#include <slang/util/Util.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 #include <unistd.h>
-#include "slang/syntax/SyntaxVisitor.h"
 
-constexpr std::string SLANDER_VERSION = "1.0.0";
+constexpr std::string SLANDER_VERSION = "0.0.1";
 
 namespace {
 
@@ -27,10 +29,13 @@ void sigIntHandler(int signal) {
 }
 
 using namespace slang::syntax;
+using namespace slander;
 
-// FIXME we need to figure out how to have like an array of multiple templates
-
-// void registerEditors(std::vector<SyntaxVisitor> &out)
+std::vector<MinimisationStrategy::Ptr> registerStrategies() {
+    std::vector<MinimisationStrategy::Ptr> out;
+    out.push_back(std::make_unique<RemoveProcessMinimisationStrategy>());
+    return out;
+}
 
 } // namespace
 
@@ -47,14 +52,16 @@ int main(int argc, char *argv[]) {
         sink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%s:%# %!] %v");
     }
 
-    CLI::App app { "(System)Verilog minimiser and mutator" };
+    CLI::App app { "Slander v" + SLANDER_VERSION + ": (System)Verilog minimiser and mutator" };
     argv = app.ensure_utf8(argv);
 
     std::filesystem::path input;
     std::string programCmdLine;
-    bool shouldPrintVersion = false;
 
-    app.add_option("-f,--file", input, "Input SystemVerilog/Verilog file")
+    std::random_device rd;
+    uint64_t seed = rd();
+
+    app.add_option("file,-f,--file", input, "Input SystemVerilog/Verilog file")
         ->required()
         ->check(CLI::ExistingFile);
     app.add_option("-p,--program", programCmdLine,
@@ -63,17 +70,13 @@ int main(int argc, char *argv[]) {
            "path to the minimised document will be appended to the command line. The program should return 0 "
            "if no bug exists. Anything else is treated as the bug still existing.")
         ->required();
-    app.add_flag("-v,--version", shouldPrintVersion, "Print version and exit.");
+    app.add_option(
+        "--seed", seed, "Fixed RNG seed for reproducibility. If not specified, a random seed is used.");
+    app.set_version_flag("-v,--version",
+        fmt::format("Slander v{} - (c) 2025 M. L. Young. Licenced under the MPL 2.0.\nUsing Slang v{}.{}",
+            SLANDER_VERSION, VersionInfo::getMajor(), VersionInfo::getMinor()));
 
     CLI11_PARSE(app, argc, argv);
-
-    if (shouldPrintVersion) {
-        SPDLOG_INFO("Slander v{} - (c) 2025 M. L. Young. Licenced under the MPL 2.0.", SLANDER_VERSION);
-        SPDLOG_INFO("Using Slang version: {}.{}", VersionInfo::getMajor(), VersionInfo::getMinor());
-        return 0;
-    }
-
-    slander::RemoveProcessMinimisationStrategy::Editor editor;
 
     return 0;
 }
