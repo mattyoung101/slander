@@ -35,6 +35,10 @@ public:
     /// process from the document, where N = 'action'
     virtual SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) = 0;
 
+    virtual std::string name() {
+        return "ERROR";
+    }
+
     using Ptr = std::unique_ptr<MinimisationStrategy>;
 };
 
@@ -47,6 +51,10 @@ public:
 
     SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) override;
 
+    std::string name() override {
+        return "RemoveProcessMinimiser";
+    }
+
     class Proposer : public SyntaxRewriter<Proposer> {
     public:
         void handle(const ProceduralBlockSyntax &block);
@@ -63,7 +71,6 @@ public:
     private:
         size_t which = 0;
         size_t count = 0;
-        bool hasRun = false;
     };
 };
 
@@ -76,6 +83,10 @@ public:
 
     SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) override;
 
+    std::string name() override {
+        return "RemoveAssignMinimiser";
+    }
+
     class Proposer : public SyntaxRewriter<Proposer> {
     public:
         void handle(const ExpressionStatementSyntax &expression);
@@ -93,8 +104,20 @@ public:
     private:
         size_t which = 0;
         size_t count = 0;
-        bool hasRun = false;
     };
+};
+
+/// Strategy that removes ports **AND** all references to those ports in the document
+class RemovePortMinimiser : public MinimisationStrategy {
+    RemovePortMinimiser() = default;
+
+    size_t proposeActions(const SyntaxTreePtr &tree) override;
+
+    SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) override;
+
+    std::string name() override {
+        return "RemovePortMinimiser";
+    }
 };
 
 } // namespace slander
