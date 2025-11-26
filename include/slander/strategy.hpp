@@ -5,9 +5,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
 // was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #pragma once
+#include "slang/syntax/AllSyntax.h"
 #include "slang/syntax/SyntaxTree.h"
 #include "slang/syntax/SyntaxVisitor.h"
-#include "slang/syntax/AllSyntax.h"
 #include <cstddef>
 #include <memory>
 
@@ -39,7 +39,7 @@ public:
 };
 
 /// Strategy that removes processes (always_ff, etc) from the document
-struct RemoveProcessMinimiser : public MinimisationStrategy {
+class RemoveProcessMinimiser : public MinimisationStrategy {
 public:
     RemoveProcessMinimiser() = default;
 
@@ -47,20 +47,53 @@ public:
 
     SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) override;
 
-    struct Proposer : SyntaxRewriter<Proposer> {
+    class Proposer : public SyntaxRewriter<Proposer> {
+    public:
         void handle(const ProceduralBlockSyntax &block);
         size_t count = 0;
     };
 
-    struct Editor : SyntaxRewriter<Editor> {
-        public:
-            Editor(size_t which) : which(which) {}
-            void handle(const ProceduralBlockSyntax &block);
+    class Editor : public SyntaxRewriter<Editor> {
+    public:
+        Editor(size_t which)
+            : which(which) {
+        }
+        void handle(const ProceduralBlockSyntax &block);
 
-        private:
-            size_t which = 0;
-            size_t count = 0;
+    private:
+        size_t which = 0;
+        size_t count = 0;
+        bool hasRun = false;
+    };
+};
 
+/// Strategy that removes
+class RemoveAssignMinimiser : public MinimisationStrategy {
+public:
+    RemoveAssignMinimiser() = default;
+
+    size_t proposeActions(const SyntaxTreePtr &tree) override;
+
+    SyntaxTreePtr act(SyntaxTreePtr &tree, size_t action) override;
+
+    class Proposer : public SyntaxRewriter<Proposer> {
+    public:
+        void handle(const ExpressionStatementSyntax &expression);
+
+        size_t count = 0;
+    };
+
+    class Editor : public SyntaxRewriter<Editor> {
+    public:
+        Editor(size_t which)
+            : which(which) {
+        }
+        void handle(const ExpressionStatementSyntax &expression);
+
+    private:
+        size_t which = 0;
+        size_t count = 0;
+        bool hasRun = false;
     };
 };
 

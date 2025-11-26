@@ -35,7 +35,7 @@ target_link_libraries(slander PRIVATE spdlog::spdlog fmt::fmt slang::slang CLI11
 add_executable(slander_test
     src/strategy.cpp
 
-    test/remove_process_strategy.cpp
+    test/strategy.cpp
 )
 target_include_directories(slander_test PRIVATE include)
 target_link_libraries(slander_test PRIVATE spdlog::spdlog fmt::fmt slang::slang Catch2::Catch2WithMain)
