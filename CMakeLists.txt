@@ -49,6 +49,11 @@ target_compile_options(slander_test PRIVATE "-Wall" "-Wextra" "-Wno-unused-param
     "-fdiagnostics-color=always")
 target_compile_definitions(slander_test PRIVATE "-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE")
 
+list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
+include(CTest)
+include(Catch)
+catch_discover_tests(slander_test)
+
 #### LINKER
 message(STATUS "Checking if mold is available")
 execute_process(COMMAND "mold" ERROR_VARIABLE MOLD_RESULT)

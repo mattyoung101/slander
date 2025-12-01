@@ -41,7 +41,7 @@ jobs:
         run: just build_debug
 
       - name: Run tests
-        run: cd build_debug; ./slander_test
+        run: cd build_debug; ninja test
 
       - name: Lint
         uses: cpp-linter/cpp-linter-action@v2
